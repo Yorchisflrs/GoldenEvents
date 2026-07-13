@@ -1,48 +1,12 @@
 <?php
-// Gestion de reservas para administrador.
-require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/../../controllers/AdminController.php';
-requireLogin();
-requireRole('admin');
-
-$reservations = AdminController::getReservations();
-$pageTitle = 'Reservas futuras';
-require_once __DIR__ . '/../../includes/header.php';
-require_once __DIR__ . '/../../includes/navbar.php';
+require_once __DIR__ . '/../../includes/auth.php'; require_once __DIR__ . '/../../controllers/ReservationController.php';
+requireLogin(); requireRole('admin'); $user = currentUser(); $message = ''; $error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { requireValidCsrfToken(); $result = ReservationController::adminCancel((int) ($_POST['id'] ?? 0), $user['id'], $_POST['reason'] ?? ''); if ($result['success']) $message = $result['message']; else $error = $result['message']; }
+$filters = ['estado' => $_GET['estado'] ?? '', 'evento_id' => (int) ($_GET['evento_id'] ?? 0), 'cliente_id' => (int) ($_GET['cliente_id'] ?? 0)];
+$reservations = ReservationController::adminReservations($filters); $pageTitle = 'Administrar reservas'; require __DIR__ . '/../../includes/header.php'; require __DIR__ . '/../../includes/navbar.php';
 ?>
-
-<main class="container">
-    <section class="section">
-        <h1 class="page-title">Reservas futuras</h1>
-        <p class="page-subtitle">Modulo heredado para fases posteriores. El flujo principal actual usa cotizaciones.</p>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Evento</th>
-                        <th>Cantidad</th>
-                        <th>Monto</th>
-                        <th>Estado</th>
-                        <th>Fecha</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($reservations as $reservation): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($reservation['cliente'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td><?php echo htmlspecialchars($reservation['evento'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td><?php echo (int) $reservation['cantidad']; ?></td>
-                            <td>S/ <?php echo number_format((float) $reservation['monto_total'], 2); ?></td>
-                            <td><span class="badge badge-<?php echo htmlspecialchars($reservation['estado'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($reservation['estado'], ENT_QUOTES, 'UTF-8'); ?></span></td>
-                            <td><?php echo htmlspecialchars($reservation['fecha_reserva'], ENT_QUOTES, 'UTF-8'); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </section>
-</main>
-
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+<main class="container"><section class="section"><h1 class="page-title">Administrar reservas</h1>
+<?php if ($message): ?><p class="alert alert-success"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?><?php if ($error): ?><p class="alert alert-error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
+<form class="filters" method="GET"><label>Estado <select name="estado"><option value="">Todos</option><?php foreach (Reservation::states() as $state): ?><option value="<?php echo $state; ?>"<?php echo $filters['estado'] === $state ? ' selected' : ''; ?>><?php echo htmlspecialchars($state, ENT_QUOTES, 'UTF-8'); ?></option><?php endforeach; ?></select></label><label>ID evento <input name="evento_id" type="number" min="1" value="<?php echo $filters['evento_id'] ?: ''; ?>"></label><label>ID cliente <input name="cliente_id" type="number" min="1" value="<?php echo $filters['cliente_id'] ?: ''; ?>"></label><button class="btn btn-outline" type="submit">Filtrar</button></form>
+<div class="table-wrapper"><table><thead><tr><th>Código</th><th>Cliente</th><th>Evento</th><th>Cantidad</th><th>Total</th><th>Reserva</th><th>Pago</th><th>Acciones</th></tr></thead><tbody><?php foreach ($reservations as $reservation): ?><tr><td><?php echo htmlspecialchars($reservation['codigo_reserva'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($reservation['cliente'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($reservation['evento'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo (int) $reservation['cantidad']; ?></td><td>S/ <?php echo formatMoney($reservation['monto_total']); ?></td><td><?php echo htmlspecialchars($reservation['estado'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($reservation['pago_estado'] ?? 'sin pago', ENT_QUOTES, 'UTF-8'); ?></td><td><a class="btn btn-small btn-outline" href="<?php echo htmlspecialchars(base_url('views/admin/reservation_detail.php?id=' . (int) $reservation['id']), ENT_QUOTES, 'UTF-8'); ?>">Detalle</a><?php if (in_array($reservation['estado'], ['pendiente_pago', 'confirmada'], true)): ?><form class="inline-form" method="POST"><?php echo csrfField(); ?><input type="hidden" name="id" value="<?php echo (int) $reservation['id']; ?>"><input name="reason" placeholder="Motivo si corresponde"><button class="btn btn-small btn-danger" type="submit" data-confirm="¿Cancelar esta reserva?">Cancelar</button></form><?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div>
+</section></main><?php require __DIR__ . '/../../includes/footer.php'; ?>

@@ -25,7 +25,7 @@ class AdminAudit
                 VALUES (:administrador_id, :accion, :entidad, :entidad_id, :detalles, :direccion_ip, :user_agent)';
         $stmt = self::db()->prepare($sql);
         return $stmt->execute([
-            'administrador_id' => (int) $adminId,
+            'administrador_id' => $adminId === null ? null : (int) $adminId,
             'accion' => substr((string) $action, 0, 100),
             'entidad' => substr((string) $entity, 0, 100),
             'entidad_id' => $entityId === null ? null : (int) $entityId,
@@ -43,7 +43,7 @@ class AdminAudit
 
         $sql = "SELECT a.*, u.nombre AS administrador_nombre, u.email AS administrador_email
                 FROM auditoria_admin a
-                INNER JOIN usuarios u ON u.id = a.administrador_id
+                LEFT JOIN usuarios u ON u.id = a.administrador_id
                 ORDER BY a.created_at DESC, a.id DESC
                 LIMIT {$perPage} OFFSET {$offset}";
         $stmt = self::db()->prepare($sql);

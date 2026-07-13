@@ -38,6 +38,10 @@ require_once __DIR__ . '/../../includes/navbar.php';
                 <h2>Mis cotizaciones</h2>
                 <p>Consulta solicitudes registradas.</p>
             </a>
+            <a class="dashboard-card" href="/GoldenHoursEvents/views/client/reservations.php">
+                <h2>Mis reservas</h2>
+                <p>Consulta entradas, pagos y confirmaciones.</p>
+            </a>
         </div>
     </section>
     </div>

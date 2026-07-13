@@ -32,7 +32,7 @@ class EventController
 
     public static function getEvent($id)
     {
-        return Event::findAvailableById($id);
+        return Event::findPublicById($id);
     }
 
     private static function validateEventData($post)

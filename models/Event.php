@@ -99,6 +99,22 @@ class Event
         return $stmt->fetch();
     }
 
+    public static function findPublicById($id)
+    {
+        $sql = "SELECT v.*, e.imagen
+                FROM vista_eventos_disponibles v
+                INNER JOIN eventos e ON e.id = v.id
+                INNER JOIN usuarios u ON u.id = e.organizador_id
+                WHERE v.id = :id
+                  AND v.estado = 'publicado'
+                  AND v.fecha_inicio > NOW()
+                  AND u.estado = 'activo'
+                LIMIT 1";
+        $stmt = self::db()->prepare($sql);
+        $stmt->execute(['id' => (int) $id]);
+        return $stmt->fetch();
+    }
+
     public static function create($data)
     {
         $sql = "INSERT INTO eventos

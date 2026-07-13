@@ -2,6 +2,7 @@
 // Modelo de cotizaciones con calculo de total en servidor.
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 class Quote
 {
@@ -9,22 +10,6 @@ class Quote
     {
         global $pdo;
         return $pdo;
-    }
-
-    private static function moneyToCents($amount)
-    {
-        $amount = trim((string) $amount);
-        if (!preg_match('/^\d+(?:\.\d{1,2})?$/', $amount)) {
-            throw new InvalidArgumentException('Importe decimal inválido.');
-        }
-        [$whole, $decimals] = array_pad(explode('.', $amount, 2), 2, '');
-        return ((int) $whole * 100) + (int) str_pad($decimals, 2, '0');
-    }
-
-    private static function centsToMoney($cents)
-    {
-        $cents = (int) $cents;
-        return intdiv($cents, 100) . '.' . str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
     }
 
     public static function createWithDetails($data, $selectedServices)
@@ -82,7 +67,7 @@ class Quote
                 }
 
                 $quantity = max(1, (int) $quantity);
-                $priceCents = self::moneyToCents($service['precio']);
+                $priceCents = moneyToCents($service['precio']);
                 $subtotalCents = $priceCents * $quantity;
                 $totalCents += $subtotalCents;
 
@@ -91,9 +76,9 @@ class Quote
                     'servicio_id' => $service['id'],
                     'categoria_nombre' => $service['categoria'] ?? 'Sin categoria',
                     'servicio_nombre' => $service['nombre'],
-                    'precio_unitario' => self::centsToMoney($priceCents),
+                    'precio_unitario' => centsToMoney($priceCents),
                     'cantidad' => $quantity,
-                    'subtotal' => self::centsToMoney($subtotalCents),
+                    'subtotal' => centsToMoney($subtotalCents),
                 ]);
             }
 
@@ -102,7 +87,7 @@ class Quote
                 return ['success' => false, 'message' => 'Selecciona al menos un servicio valido.'];
             }
 
-            $total = self::centsToMoney($totalCents);
+            $total = centsToMoney($totalCents);
             $stmt = $db->prepare('UPDATE cotizaciones SET total_estimado = :total WHERE id = :id');
             $stmt->execute(['total' => $total, 'id' => $quoteId]);
 

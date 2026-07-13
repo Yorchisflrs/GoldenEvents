@@ -52,6 +52,11 @@ class AdminController
             'eventos_publicados' => Event::countByStatus('publicado'),
             'cotizaciones' => Quote::countAll(),
             'cotizaciones_pendientes' => Quote::countPending(),
+            'reservas' => Reservation::countAll(),
+            'reservas_pendiente_pago' => Reservation::countByStatus('pendiente_pago'),
+            'pagos_en_revision' => Payment::countByStatus('en_revision'),
+            'pagos_aprobados' => Payment::countSuccessful(),
+            'ingresos_aprobados' => Payment::totalRevenue(),
         ];
     }
 
@@ -142,14 +147,14 @@ class AdminController
         });
     }
 
-    public static function getReservations()
+    public static function getReservations($filters = [])
     {
-        return Reservation::all();
+        return Reservation::all($filters);
     }
 
-    public static function getPayments()
+    public static function getPayments($filters = [])
     {
-        return Payment::all();
+        return Payment::all($filters);
     }
 
     public static function getServices($filters = [])

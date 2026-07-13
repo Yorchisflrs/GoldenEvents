@@ -1527,3 +1527,58 @@ body.page-ready .fade-up {
         animation: none !important;
     }
 }
+
+/* Flujo de reservas y pago Yape */
+.payment-qr-panel {
+    text-align: center;
+}
+
+.yape-qr {
+    display: block;
+    width: min(100%, 320px);
+    height: auto;
+    margin: 0 auto 1rem;
+    border-radius: 18px;
+}
+
+.countdown,
+[data-countdown] {
+    font-weight: 700;
+    color: #7a2a90;
+}
+
+.inline-form {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    margin: .25rem;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.filters label {
+    display: grid;
+    gap: .35rem;
+}
+
+.printable-confirmation dl {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) 2fr;
+    gap: .75rem;
+}
+
+.printable-confirmation dt { font-weight: 700; }
+
+@media print {
+    .no-print,
+    .footer,
+    .navbar { display: none !important; }
+    .printable-confirmation { color: #000; }
+}

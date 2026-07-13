@@ -28,6 +28,7 @@ public/uploads/*
 !public/uploads/.htaccess
 storage/uploads/payment_proofs/*
 !storage/uploads/payment_proofs/.gitkeep
+!storage/uploads/payment_proofs/.htaccess
 
 # Dependencies and generated documentation
 node_modules/

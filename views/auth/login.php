@@ -8,6 +8,7 @@ if (isLoggedIn()) {
 
 $error = '';
 $success = $_GET['success'] ?? '';
+$returnUrl = safeInternalReturnUrl($_POST['return'] ?? $_GET['return'] ?? '', null);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireValidCsrfToken();
@@ -17,6 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $result = AuthController::login($email, $password);
     if ($result['success']) {
+        $user = currentUser();
+        if ($returnUrl !== null && $user && $user['rol'] === 'cliente') {
+            redirect($returnUrl);
+        }
         AuthController::redirectByRole();
     }
 
@@ -48,6 +53,7 @@ if (!$isFragment) {
 
         <form class="form-container" method="POST" action="/GoldenHoursEvents/views/auth/login.php">
             <?php echo csrfField(); ?>
+            <?php if ($returnUrl !== null): ?><input type="hidden" name="return" value="<?php echo htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>

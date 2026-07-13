@@ -15,7 +15,7 @@ class Event
     {
         $sql = "SELECT *
                 FROM vista_eventos_disponibles
-                WHERE estado = 'activo' AND cupos_disponibles > 0
+                WHERE estado = 'publicado' AND fecha_inicio > NOW() AND cupos_disponibles > 0
                 ORDER BY fecha_inicio ASC";
         $stmt = self::db()->prepare($sql);
         $stmt->execute();
@@ -38,7 +38,7 @@ class Event
     {
         $sql = "SELECT *
                 FROM vista_eventos_disponibles
-                WHERE id = :id AND estado = 'activo'
+                WHERE id = :id AND estado = 'publicado' AND fecha_inicio > NOW() AND cupos_disponibles > 0
                 LIMIT 1";
         $stmt = self::db()->prepare($sql);
         $stmt->execute(['id' => $id]);
@@ -63,7 +63,7 @@ class Event
             'direccion' => $data['direccion'] ?? null,
             'cupo_total' => $data['cupo_total'],
             'precio' => $data['precio'],
-            'estado' => $data['estado'] ?? 'activo',
+            'estado' => $data['estado'] ?? 'pendiente_aprobacion',
         ]);
     }
 
@@ -103,7 +103,7 @@ class Event
             'direccion' => $data['direccion'] ?? null,
             'cupo_total' => $data['cupo_total'],
             'precio' => $data['precio'],
-            'estado' => $data['estado'] ?? 'activo',
+            'estado' => $data['estado'] ?? 'pendiente_aprobacion',
             'id' => $id,
             'organizador_id' => $organizadorId,
         ]);

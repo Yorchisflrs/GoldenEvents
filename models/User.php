@@ -82,7 +82,7 @@ class User
 
     public static function updateStatus($id, $estado)
     {
-        $allowed = ['activo', 'inactivo', 'bloqueado'];
+        $allowed = ['pendiente', 'activo', 'inactivo', 'bloqueado', 'rechazado'];
         if (!in_array($estado, $allowed, true)) {
             return false;
         }

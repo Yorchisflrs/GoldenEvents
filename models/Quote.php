@@ -14,16 +14,24 @@ class Quote
     public static function createWithDetails($data, $selectedServices)
     {
         $db = self::db();
+        $publicToken = null;
+        $publicTokenHash = null;
+
+        if (empty($data['usuario_id'])) {
+            $publicToken = bin2hex(random_bytes(32));
+            $publicTokenHash = hash('sha256', $publicToken);
+        }
 
         try {
             $db->beginTransaction();
 
             $stmt = $db->prepare("INSERT INTO cotizaciones
-                (usuario_id, nombre_cliente, telefono_cliente, email_cliente, tipo_evento, fecha_evento, cantidad_invitados, total_estimado, mensaje, estado)
+                (usuario_id, public_token_hash, nombre_cliente, telefono_cliente, email_cliente, tipo_evento, fecha_evento, cantidad_invitados, total_estimado, mensaje, estado)
                 VALUES
-                (:usuario_id, :nombre_cliente, :telefono_cliente, :email_cliente, :tipo_evento, :fecha_evento, :cantidad_invitados, 0.00, :mensaje, 'pendiente')");
+                (:usuario_id, :public_token_hash, :nombre_cliente, :telefono_cliente, :email_cliente, :tipo_evento, :fecha_evento, :cantidad_invitados, 0.00, :mensaje, 'pendiente')");
             $stmt->execute([
                 'usuario_id' => $data['usuario_id'],
+                'public_token_hash' => $publicTokenHash,
                 'nombre_cliente' => $data['nombre_cliente'],
                 'telefono_cliente' => $data['telefono_cliente'],
                 'email_cliente' => $data['email_cliente'] ?: null,
@@ -79,7 +87,12 @@ class Quote
             $stmt->execute(['total' => $total, 'id' => $quoteId]);
 
             $db->commit();
-            return ['success' => true, 'quote_id' => $quoteId, 'total' => $total];
+            return [
+                'success' => true,
+                'quote_id' => $quoteId,
+                'total' => $total,
+                'public_token' => $publicToken,
+            ];
         } catch (Throwable $e) {
             if ($db->inTransaction()) {
                 $db->rollBack();
@@ -106,6 +119,21 @@ class Quote
         $sql .= ' LIMIT 1';
         $stmt = self::db()->prepare($sql);
         $stmt->execute($params);
+        return $stmt->fetch();
+    }
+
+    public static function findByPublicToken($token)
+    {
+        if (!is_string($token) || strlen($token) !== 64 || !ctype_xdigit($token)) {
+            return false;
+        }
+
+        $stmt = self::db()->prepare("SELECT c.*, u.email AS usuario_email
+                                     FROM cotizaciones c
+                                     LEFT JOIN usuarios u ON c.usuario_id = u.id
+                                     WHERE c.public_token_hash = :token_hash
+                                     LIMIT 1");
+        $stmt->execute(['token_hash' => hash('sha256', strtolower($token))]);
         return $stmt->fetch();
     }
 

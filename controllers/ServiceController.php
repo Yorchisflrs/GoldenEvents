@@ -48,7 +48,7 @@ class ServiceController
             'ubicacion' => trim($post['ubicacion'] ?? ''),
             'imagen' => $imagePath,
             'disponibilidad' => isset($post['disponibilidad']) ? 1 : 0,
-            'estado' => 'activo',
+            'estado' => 'pendiente',
         ]);
 
         return [

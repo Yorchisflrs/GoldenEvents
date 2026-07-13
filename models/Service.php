@@ -74,7 +74,7 @@ class Service
             'ubicacion' => $data['ubicacion'] ?: null,
             'imagen' => $data['imagen'] ?: null,
             'disponibilidad' => $data['disponibilidad'] ?? 1,
-            'estado' => $data['estado'] ?? 'activo',
+            'estado' => $data['estado'] ?? 'pendiente',
         ]);
     }
 

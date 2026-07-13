@@ -1,9 +1,10 @@
 <?php
 // Funciones auxiliares generales del proyecto.
+require_once __DIR__ . '/../config/app.php';
 
 function base_url($path = '')
 {
-    return '/GoldenHoursEvents/' . ltrim($path, '/');
+    return appUrl($path);
 }
 
 function redirect($url)
@@ -19,7 +20,12 @@ function sanitize($data)
 
 function generateTransactionCode()
 {
-    return 'TXN-' . date('Ymd') . '-' . strtoupper(uniqid());
+    return 'TXN-' . strtoupper(bin2hex(random_bytes(8)));
+}
+
+function generateReservationCode()
+{
+    return 'RES-' . strtoupper(bin2hex(random_bytes(12)));
 }
 
 function isFragmentRequest()

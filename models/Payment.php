@@ -26,7 +26,7 @@ class Payment
 
     public static function countSuccessful()
     {
-        $stmt = self::db()->prepare("SELECT COUNT(*) AS total FROM pagos WHERE estado = 'exitoso'");
+        $stmt = self::db()->prepare("SELECT COUNT(*) AS total FROM pagos WHERE estado = 'aprobado'");
         $stmt->execute();
         $row = $stmt->fetch();
         return (int) $row['total'];
@@ -34,7 +34,7 @@ class Payment
 
     public static function totalRevenue()
     {
-        $stmt = self::db()->prepare("SELECT COALESCE(SUM(monto), 0) AS total FROM pagos WHERE estado = 'exitoso'");
+        $stmt = self::db()->prepare("SELECT COALESCE(SUM(monto), 0) AS total FROM pagos WHERE estado = 'aprobado'");
         $stmt->execute();
         $row = $stmt->fetch();
         return (float) $row['total'];

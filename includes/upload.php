@@ -1,5 +1,6 @@
 <?php
 // Utilidades seguras para carga de imagenes.
+require_once __DIR__ . '/../config/app.php';
 
 function uploadImage($file, $targetDir, $prefix = 'img')
 {
@@ -16,8 +17,9 @@ function uploadImage($file, $targetDir, $prefix = 'img')
     }
 
     $size = (int) ($file['size'] ?? 0);
-    if ($size <= 0 || $size > 2 * 1024 * 1024) {
-        return ['success' => false, 'message' => 'La imagen no debe superar 2MB.'];
+    $maxBytes = (int) appConfig('uploads.max_bytes', 2 * 1024 * 1024);
+    if ($size <= 0 || $size > $maxBytes) {
+        return ['success' => false, 'message' => 'La imagen supera el tamano maximo permitido.'];
     }
 
     $temporaryPath = $file['tmp_name'] ?? '';
@@ -26,18 +28,16 @@ function uploadImage($file, $targetDir, $prefix = 'img')
     }
 
     $providedExtension = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+    $allowedExtensions = array_map('strtolower', (array) appConfig('uploads.allowed_extensions', []));
     if (!in_array($providedExtension, $allowedExtensions, true)) {
         return ['success' => false, 'message' => 'Formato de imagen no permitido.'];
     }
 
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime = $finfo->file($temporaryPath);
-    $allowedMimes = [
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp',
-    ];
+    $configuredMimes = (array) appConfig('uploads.allowed_mimes', []);
+    $knownMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $allowedMimes = array_intersect_key($knownMimes, array_flip($configuredMimes));
 
     if (!isset($allowedMimes[$mime]) || @getimagesize($temporaryPath) === false) {
         return ['success' => false, 'message' => 'El contenido del archivo no es una imagen permitida.'];

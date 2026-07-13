@@ -1,0 +1,42 @@
+# Environment and machine-local configuration
+.env
+.env.*
+!.env.example
+config/local.php
+
+# Logs, caches and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+logs/*
+!logs/.gitkeep
+storage/logs/*
+!storage/logs/.gitkeep
+tmp/
+cache/
+
+# Database backups and generated exports
+backups/
+*.sql.gz
+*.dump
+
+# User-generated files
+public/uploads/*
+!public/uploads/.gitkeep
+!public/uploads/.htaccess
+storage/uploads/payment_proofs/*
+!storage/uploads/payment_proofs/.gitkeep
+
+# Dependencies and generated documentation
+node_modules/
+tools/documentation/output/
+*.docx
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

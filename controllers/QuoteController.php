@@ -62,6 +62,7 @@ class QuoteController
             'message' => 'Cotizacion registrada correctamente.',
             'quote_id' => $result['quote_id'],
             'total' => $result['total'],
+            'public_token' => $result['public_token'] ?? null,
         ];
     }
 
@@ -72,6 +73,16 @@ class QuoteController
         return [
             'quote' => $quote,
             'details' => $quote ? Quote::details($id) : [],
+        ];
+    }
+
+    public static function getPublicQuote($token)
+    {
+        $quote = Quote::findByPublicToken($token);
+
+        return [
+            'quote' => $quote,
+            'details' => $quote ? Quote::details((int) $quote['id']) : [],
         ];
     }
 

@@ -1,5 +1,12 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
+
+if (appConfig('environment') === 'production') {
+    http_response_code(404);
+    echo 'Pagina no disponible.';
+    exit;
+}
+
 requireLogin();
 requireRole('admin');
 require_once __DIR__ . '/config/database.php';

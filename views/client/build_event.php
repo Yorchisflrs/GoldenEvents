@@ -36,13 +36,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/GoldenHoursEvents/views/client/build_event.php');
     }
 
-    requireLogin();
     $_POST['selected_services'] = $_SESSION['quote_services'];
-    $userId = currentUser()['id'];
+    $userId = isLoggedIn() ? (int) currentUser()['id'] : null;
     $result = QuoteController::createQuote($_POST, $userId);
 
     if ($result['success']) {
         $_SESSION['quote_services'] = [];
+
+        if (!empty($result['public_token'])) {
+            redirect('/GoldenHoursEvents/views/client/quote_result.php?token=' . urlencode($result['public_token']));
+        }
+
         redirect('/GoldenHoursEvents/views/client/quote_result.php?id=' . (int) $result['quote_id']);
     }
 

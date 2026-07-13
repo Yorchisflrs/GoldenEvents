@@ -76,7 +76,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
 
         <label for="estado">Estado</label>
         <select id="estado" name="estado">
-            <?php foreach (['borrador', 'activo', 'cancelado', 'finalizado'] as $estado): ?>
+            <?php foreach (['borrador', 'pendiente_aprobacion', 'publicado', 'rechazado', 'cancelado', 'finalizado', 'inactivo'] as $estado): ?>
                 <option value="<?php echo $estado; ?>" <?php echo $event['estado'] === $estado ? 'selected' : ''; ?>>
                     <?php echo htmlspecialchars($estado, ENT_QUOTES, 'UTF-8'); ?>
                 </option>

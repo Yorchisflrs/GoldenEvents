@@ -75,6 +75,18 @@ class EventController
             return ['success' => false, 'message' => 'La fecha de inicio es obligatoria.'];
         }
 
+        $startTimestamp = strtotime((string) $post['fecha_inicio']);
+        $endValue = trim((string) ($post['fecha_fin'] ?? ''));
+        $endTimestamp = $endValue === '' ? null : strtotime($endValue);
+
+        if ($startTimestamp === false || ($endValue !== '' && $endTimestamp === false)) {
+            return ['success' => false, 'message' => 'Ingresa fechas validas.'];
+        }
+
+        if ($endTimestamp !== null && $endTimestamp <= $startTimestamp) {
+            return ['success' => false, 'message' => 'La fecha final debe ser posterior a la fecha inicial.'];
+        }
+
         if (trim($post['lugar'] ?? '') === '') {
             return ['success' => false, 'message' => 'El lugar es obligatorio.'];
         }
@@ -92,6 +104,12 @@ class EventController
 
     private static function normalizeEventData($post)
     {
+        $allowedStates = ['borrador', 'pendiente_aprobacion', 'publicado', 'rechazado', 'cancelado', 'finalizado', 'inactivo'];
+        $state = $post['estado'] ?? 'pendiente_aprobacion';
+        if (!in_array($state, $allowedStates, true)) {
+            $state = 'pendiente_aprobacion';
+        }
+
         return [
             'titulo' => trim($post['titulo']),
             'descripcion' => trim($post['descripcion']),
@@ -102,7 +120,7 @@ class EventController
             'direccion' => trim($post['direccion'] ?? ''),
             'cupo_total' => (int) $post['cupo_total'],
             'precio' => (float) $post['precio'],
-            'estado' => $post['estado'] ?? 'activo',
+            'estado' => $state,
         ];
     }
 }

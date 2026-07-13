@@ -4,11 +4,18 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../controllers/QuoteController.php';
 
-requireLogin();
+$publicToken = trim((string) ($_GET['token'] ?? ''));
 
-$quoteId = (int) ($_GET['id'] ?? 0);
-$user = currentUser();
-$data = QuoteController::getQuote($quoteId, (int) $user['id'], $user['rol'] === 'admin');
+if ($publicToken !== '') {
+    header('Cache-Control: no-store, private');
+    header('Referrer-Policy: no-referrer');
+    $data = QuoteController::getPublicQuote($publicToken);
+} else {
+    requireLogin();
+    $quoteId = (int) ($_GET['id'] ?? 0);
+    $user = currentUser();
+    $data = QuoteController::getQuote($quoteId, (int) $user['id'], $user['rol'] === 'admin');
+}
 $quote = $data['quote'];
 $details = $data['details'];
 

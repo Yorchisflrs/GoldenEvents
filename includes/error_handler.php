@@ -1,5 +1,6 @@
 <?php
 // Manejo central de errores: registra detalles tecnicos y muestra respuestas seguras.
+require_once __DIR__ . '/../config/app.php';
 
 function registerApplicationErrorHandler()
 {
@@ -12,7 +13,7 @@ function registerApplicationErrorHandler()
     $registered = true;
     ini_set('log_errors', '1');
 
-    if (strtolower((string) (getenv('APP_ENV') ?: 'development')) === 'production') {
+    if (appConfig('environment') === 'production') {
         ini_set('display_errors', '0');
     }
 
@@ -36,4 +37,3 @@ function registerApplicationErrorHandler()
 }
 
 registerApplicationErrorHandler();
-

@@ -19,7 +19,7 @@ class Reservation
         try {
             $db->beginTransaction();
 
-            $stmt = $db->prepare("SELECT * FROM eventos WHERE id = :id AND estado = 'activo' FOR UPDATE");
+            $stmt = $db->prepare("SELECT * FROM eventos WHERE id = :id AND estado = 'publicado' FOR UPDATE");
             $stmt->execute(['id' => $eventoId]);
             $evento = $stmt->fetch();
 
@@ -30,7 +30,7 @@ class Reservation
 
             $stmt = $db->prepare("SELECT COALESCE(SUM(cantidad), 0) AS reservados
                                   FROM reservas
-                                  WHERE evento_id = :evento_id AND estado = 'pagado'");
+                                  WHERE evento_id = :evento_id AND estado = 'confirmada'");
             $stmt->execute(['evento_id' => $eventoId]);
             $reserved = (int) $stmt->fetch()['reservados'];
             $available = (int) $evento['cupo_total'] - $reserved;
@@ -42,31 +42,35 @@ class Reservation
 
             $total = (float) $evento['precio'] * $cantidad;
             $transactionCode = generateTransactionCode();
+            $reservationCode = generateReservationCode();
 
             $stmt = $db->prepare("INSERT INTO reservas
-                                  (usuario_id, evento_id, cantidad, monto_total, estado, metodo_pago, codigo_transaccion)
+                                  (codigo_reserva, usuario_id, evento_id, cantidad, precio_unitario, monto_total, estado, metodo_pago, codigo_transaccion)
                                   VALUES
-                                  (:usuario_id, :evento_id, :cantidad, :monto_total, 'pagado', :metodo_pago, :codigo_transaccion)");
+                                  (:codigo_reserva, :usuario_id, :evento_id, :cantidad, :precio_unitario, :monto_total, 'confirmada', :metodo_pago, :codigo_transaccion)");
             $stmt->execute([
+                'codigo_reserva' => $reservationCode,
                 'usuario_id' => $usuarioId,
                 'evento_id' => $eventoId,
                 'cantidad' => $cantidad,
+                'precio_unitario' => (float) $evento['precio'],
                 'monto_total' => $total,
                 'metodo_pago' => $metodoPago,
                 'codigo_transaccion' => $transactionCode,
             ]);
 
             $reservationId = $db->lastInsertId();
-            $paymentReference = 'PAY-' . date('Ymd') . '-' . strtoupper(uniqid());
+            $paymentReference = 'PAY-' . strtoupper(bin2hex(random_bytes(8)));
 
             $stmt = $db->prepare("INSERT INTO pagos
-                                  (reserva_id, monto, moneda, metodo, estado, referencia, fecha_pago)
+                                  (reserva_id, monto, moneda, metodo, codigo_operacion, estado, referencia, fecha_pago, fecha_validacion)
                                   VALUES
-                                  (:reserva_id, :monto, 'PEN', :metodo, 'exitoso', :referencia, NOW())");
+                                  (:reserva_id, :monto, 'PEN', :metodo, :codigo_operacion, 'aprobado', :referencia, NOW(), NOW())");
             $stmt->execute([
                 'reserva_id' => $reservationId,
                 'monto' => $total,
                 'metodo' => $metodoPago,
+                'codigo_operacion' => $paymentReference,
                 'referencia' => $paymentReference,
             ]);
 

@@ -62,14 +62,27 @@ class QuoteController
             'message' => 'Cotizacion registrada correctamente.',
             'quote_id' => $result['quote_id'],
             'total' => $result['total'],
+            'public_token' => $result['public_token'] ?? null,
         ];
     }
 
-    public static function getQuote($id)
+    public static function getQuote($id, $userId, $isAdmin = false)
     {
+        $quote = Quote::findAccessibleById($id, $userId, $isAdmin);
+
         return [
-            'quote' => Quote::findById($id),
-            'details' => Quote::details($id),
+            'quote' => $quote,
+            'details' => $quote ? Quote::details($id) : [],
+        ];
+    }
+
+    public static function getPublicQuote($token)
+    {
+        $quote = Quote::findByPublicToken($token);
+
+        return [
+            'quote' => $quote,
+            'details' => $quote ? Quote::details((int) $quote['id']) : [],
         ];
     }
 
@@ -83,8 +96,4 @@ class QuoteController
         return Quote::all();
     }
 
-    public static function changeStatus($id, $estado)
-    {
-        return Quote::updateStatus($id, $estado);
-    }
 }

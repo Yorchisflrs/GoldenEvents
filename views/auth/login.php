@@ -8,16 +8,24 @@ if (isLoggedIn()) {
 
 $error = '';
 $success = $_GET['success'] ?? '';
+$returnUrl = safeInternalReturnUrl($_POST['return'] ?? $_GET['return'] ?? '', null);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (AuthController::login($email, $password)) {
+    $result = AuthController::login($email, $password);
+    if ($result['success']) {
+        $user = currentUser();
+        if ($returnUrl !== null && $user && $user['rol'] === 'cliente') {
+            redirect($returnUrl);
+        }
         AuthController::redirectByRole();
     }
 
-    $error = 'Credenciales incorrectas o usuario inactivo.';
+    $error = $result['message'];
 }
 
 $pageTitle = 'Iniciar sesion';
@@ -44,6 +52,8 @@ if (!$isFragment) {
         <?php endif; ?>
 
         <form class="form-container" method="POST" action="/GoldenHoursEvents/views/auth/login.php">
+            <?php echo csrfField(); ?>
+            <?php if ($returnUrl !== null): ?><input type="hidden" name="return" value="<?php echo htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
@@ -58,16 +68,6 @@ if (!$isFragment) {
         </form>
 
         <p>No tienes cuenta? <a class="js-page-link" href="/GoldenHoursEvents/views/auth/register.php">Registrate aqui</a></p>
-
-        <div class="demo-box">
-            <h2>Usuarios demo</h2>
-            <ul class="link-list">
-                <li>admin@golden.com / password</li>
-                <li>organizador@golden.com / password</li>
-                <li>cliente@golden.com / password</li>
-                <li>proveedor@golden.com / password</li>
-            </ul>
-        </div>
     </section>
     </div>
 </section>

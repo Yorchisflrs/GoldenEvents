@@ -1,0 +1,6 @@
+Options -Indexes -ExecCGI
+Require all denied
+
+<FilesMatch ".*">
+    Require all denied
+</FilesMatch>

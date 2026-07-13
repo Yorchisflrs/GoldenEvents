@@ -16,6 +16,8 @@ if (!$event || (int) $event['organizador_id'] !== (int) $user['id']) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     EventController::cancelEvent($eventId, $user['id']);
     redirect('/GoldenHoursEvents/views/organizer/my_events.php');
 }
@@ -30,6 +32,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
     <p>Estas seguro de cancelar el evento <strong><?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?></strong>?</p>
 
     <form method="POST" action="/GoldenHoursEvents/views/organizer/delete_event.php?id=<?php echo $eventId; ?>">
+        <?php echo csrfField(); ?>
         <button class="btn" type="submit">Si, cancelar evento</button>
         <a class="btn btn-outline" href="/GoldenHoursEvents/views/organizer/my_events.php">Volver</a>
     </form>

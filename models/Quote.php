@@ -2,6 +2,7 @@
 // Modelo de cotizaciones con calculo de total en servidor.
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 class Quote
 {
@@ -14,16 +15,24 @@ class Quote
     public static function createWithDetails($data, $selectedServices)
     {
         $db = self::db();
+        $publicToken = null;
+        $publicTokenHash = null;
+
+        if (empty($data['usuario_id'])) {
+            $publicToken = bin2hex(random_bytes(32));
+            $publicTokenHash = hash('sha256', $publicToken);
+        }
 
         try {
             $db->beginTransaction();
 
             $stmt = $db->prepare("INSERT INTO cotizaciones
-                (usuario_id, nombre_cliente, telefono_cliente, email_cliente, tipo_evento, fecha_evento, cantidad_invitados, total_estimado, mensaje, estado)
+                (usuario_id, public_token_hash, nombre_cliente, telefono_cliente, email_cliente, tipo_evento, fecha_evento, cantidad_invitados, total_estimado, mensaje, estado)
                 VALUES
-                (:usuario_id, :nombre_cliente, :telefono_cliente, :email_cliente, :tipo_evento, :fecha_evento, :cantidad_invitados, 0.00, :mensaje, 'pendiente')");
+                (:usuario_id, :public_token_hash, :nombre_cliente, :telefono_cliente, :email_cliente, :tipo_evento, :fecha_evento, :cantidad_invitados, 0.00, :mensaje, 'pendiente')");
             $stmt->execute([
                 'usuario_id' => $data['usuario_id'],
+                'public_token_hash' => $publicTokenHash,
                 'nombre_cliente' => $data['nombre_cliente'],
                 'telefono_cliente' => $data['telefono_cliente'],
                 'email_cliente' => $data['email_cliente'] ?: null,
@@ -34,7 +43,7 @@ class Quote
             ]);
 
             $quoteId = (int) $db->lastInsertId();
-            $total = 0.0;
+            $totalCents = 0;
             $detailSql = "INSERT INTO cotizacion_detalles
                 (cotizacion_id, servicio_id, categoria_nombre, servicio_nombre, precio_unitario, cantidad, subtotal)
                 VALUES
@@ -42,8 +51,11 @@ class Quote
             $detailStmt = $db->prepare($detailSql);
             $serviceStmt = $db->prepare("SELECT s.id, s.nombre, s.precio, c.nombre AS categoria
                                          FROM servicios s
-                                         LEFT JOIN categorias_servicio c ON s.categoria_id = c.id
+                                         INNER JOIN proveedores p ON p.id = s.proveedor_id
+                                         INNER JOIN usuarios u ON u.id = p.usuario_id
+                                         INNER JOIN categorias_servicio c ON s.categoria_id = c.id
                                          WHERE s.id = :id AND s.estado = 'activo' AND s.disponibilidad = 1
+                                           AND p.estado = 'activo' AND u.estado = 'activo' AND c.estado = 'activo'
                                          LIMIT 1");
 
             foreach ($selectedServices as $serviceId => $quantity) {
@@ -55,49 +67,78 @@ class Quote
                 }
 
                 $quantity = max(1, (int) $quantity);
-                $price = (float) $service['precio'];
-                $subtotal = $price * $quantity;
-                $total += $subtotal;
+                $priceCents = moneyToCents($service['precio']);
+                $subtotalCents = $priceCents * $quantity;
+                $totalCents += $subtotalCents;
 
                 $detailStmt->execute([
                     'cotizacion_id' => $quoteId,
                     'servicio_id' => $service['id'],
                     'categoria_nombre' => $service['categoria'] ?? 'Sin categoria',
                     'servicio_nombre' => $service['nombre'],
-                    'precio_unitario' => $price,
+                    'precio_unitario' => centsToMoney($priceCents),
                     'cantidad' => $quantity,
-                    'subtotal' => $subtotal,
+                    'subtotal' => centsToMoney($subtotalCents),
                 ]);
             }
 
-            if ($total <= 0) {
+            if ($totalCents <= 0) {
                 $db->rollBack();
                 return ['success' => false, 'message' => 'Selecciona al menos un servicio valido.'];
             }
 
+            $total = centsToMoney($totalCents);
             $stmt = $db->prepare('UPDATE cotizaciones SET total_estimado = :total WHERE id = :id');
             $stmt->execute(['total' => $total, 'id' => $quoteId]);
 
             $db->commit();
-            return ['success' => true, 'quote_id' => $quoteId, 'total' => $total];
+            return [
+                'success' => true,
+                'quote_id' => $quoteId,
+                'total' => $total,
+                'public_token' => $publicToken,
+            ];
         } catch (Throwable $e) {
             if ($db->inTransaction()) {
                 $db->rollBack();
             }
 
+            error_log('[GoldenHourEvents] Error al crear cotizacion: ' . $e->getMessage());
             return ['success' => false, 'message' => 'No se pudo registrar la cotizacion.'];
         }
     }
 
-    public static function findById($id)
+    public static function findAccessibleById($id, $userId, $isAdmin = false)
     {
         $sql = "SELECT c.*, u.email AS usuario_email
                 FROM cotizaciones c
                 LEFT JOIN usuarios u ON c.usuario_id = u.id
-                WHERE c.id = :id
-                LIMIT 1";
+                WHERE c.id = :id";
+        $params = ['id' => $id];
+
+        if (!$isAdmin) {
+            $sql .= ' AND c.usuario_id = :usuario_id';
+            $params['usuario_id'] = $userId;
+        }
+
+        $sql .= ' LIMIT 1';
         $stmt = self::db()->prepare($sql);
-        $stmt->execute(['id' => $id]);
+        $stmt->execute($params);
+        return $stmt->fetch();
+    }
+
+    public static function findByPublicToken($token)
+    {
+        if (!is_string($token) || strlen($token) !== 64 || !ctype_xdigit($token)) {
+            return false;
+        }
+
+        $stmt = self::db()->prepare("SELECT c.*, u.email AS usuario_email
+                                     FROM cotizaciones c
+                                     LEFT JOIN usuarios u ON c.usuario_id = u.id
+                                     WHERE c.public_token_hash = :token_hash AND c.usuario_id IS NULL
+                                     LIMIT 1");
+        $stmt->execute(['token_hash' => hash('sha256', strtolower($token))]);
         return $stmt->fetch();
     }
 

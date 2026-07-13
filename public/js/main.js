@@ -84,6 +84,43 @@ console.log("Golden Hour Events cargado correctamente");
         });
     }
 
+    function initReservationTotals(root = document) {
+        qsa(".reservation-form", root).forEach(function (form) {
+            const quantity = qs("[name='quantity']", form);
+            const output = qs("[data-reservation-total]", form);
+            const unitCents = Number(form.dataset.unitPrice || 0);
+            if (!quantity || !output || form.dataset.totalBound === "1") return;
+            form.dataset.totalBound = "1";
+            const refresh = function () {
+                const total = Math.max(0, Number.parseInt(quantity.value, 10) || 0) * unitCents;
+                output.textContent = `S/ ${(total / 100).toFixed(2)}`;
+            };
+            quantity.addEventListener("input", refresh);
+            refresh();
+        });
+    }
+
+    function initCountdowns(root = document) {
+        qsa("[data-countdown]", root).forEach(function (element) {
+            if (element.dataset.countdownBound === "1") return;
+            element.dataset.countdownBound = "1";
+            const expires = Date.parse(element.dataset.countdown || "");
+            const update = function () {
+                const remaining = Math.max(0, expires - Date.now());
+                if (!Number.isFinite(expires) || remaining <= 0) {
+                    element.textContent = "El plazo de pago venció.";
+                    return false;
+                }
+                const seconds = Math.floor(remaining / 1000);
+                const minutes = Math.floor(seconds / 60);
+                element.textContent = `Tiempo restante: ${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+                return true;
+            };
+            update();
+            const timer = window.setInterval(function () { if (!update()) window.clearInterval(timer); }, 1000);
+        });
+    }
+
     function showLoader() {
         const loader = qs("#pageLoader");
         if (loader) {
@@ -195,6 +232,8 @@ console.log("Golden Hour Events cargado correctamente");
         initConfirmations(root);
         initSmoothScroll(root);
         initReveal(root);
+        initReservationTotals(root);
+        initCountdowns(root);
     }
 
     document.addEventListener("DOMContentLoaded", function () {

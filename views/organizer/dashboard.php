@@ -15,14 +15,14 @@ require_once __DIR__ . '/../../includes/navbar.php';
     <section class="section">
         <div class="glass-panel dashboard-header">
             <h1 class="page-title">Panel del Organizador</h1>
-            <p class="page-subtitle">Bienvenido, <?php echo htmlspecialchars($user['nombre'], ENT_QUOTES, 'UTF-8'); ?>. Este modulo queda como soporte interno; el flujo principal usa servicios y cotizaciones.</p>
+            <p class="page-subtitle">Bienvenido, <?php echo htmlspecialchars($user['nombre'], ENT_QUOTES, 'UTF-8'); ?>. Crea y administra tus eventos para aprobación.</p>
         </div>
 
         <div class="grid-3">
             <a class="dashboard-card" href="/GoldenHoursEvents/views/organizer/create_event.php">
                 <span class="icon">🗓️</span>
-                <h2>Crear evento interno</h2>
-                <p>Registra eventos de referencia o gestion interna.</p>
+                <h2>Crear evento</h2>
+                <p>Registra un evento para revisión administrativa.</p>
             </a>
             <a class="dashboard-card" href="/GoldenHoursEvents/views/organizer/my_events.php">
                 <span class="icon">📋</span>
@@ -33,6 +33,10 @@ require_once __DIR__ . '/../../includes/navbar.php';
                 <span class="icon">🎉</span>
                 <h2>Ver servicios publicos</h2>
                 <p>Explora el catalogo del marketplace.</p>
+            </a>
+            <a class="dashboard-card" href="/GoldenHoursEvents/views/organizer/reservations.php">
+                <h2>Reservas de mis eventos</h2>
+                <p>Consulta aforo, reservas e ingresos aprobados.</p>
             </a>
         </div>
     </section>

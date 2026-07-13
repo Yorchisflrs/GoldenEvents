@@ -1,2 +1,11 @@
 Options -Indexes
 DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(?:config|sql|docs|storage|tools)(?:/|$) - [F,L,NC]
+</IfModule>
+
+<FilesMatch "^(?:\.env|composer\.(?:json|lock)|README(?:\.[A-Za-z0-9_-]+)?|.*\.(?:log|bak|dump|sql\.gz))$">
+    Require all denied
+</FilesMatch>

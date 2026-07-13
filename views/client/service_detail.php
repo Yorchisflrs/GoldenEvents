@@ -1,6 +1,7 @@
 <?php
 // Detalle publico de un servicio.
 require_once __DIR__ . '/../../includes/helpers.php';
+require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../controllers/ServiceController.php';
 
 $serviceId = (int) ($_GET['id'] ?? 0);
@@ -68,7 +69,10 @@ if (!$isFragment) {
                 </ul>
 
                 <div class="cta-row">
-                    <a class="btn btn-primary" href="/GoldenHoursEvents/views/client/build_event.php?add_service=<?php echo (int) $service['id']; ?>" data-no-transition>Agregar a mi cotizacion</a>
+                    <form class="inline-form" method="POST" action="/GoldenHoursEvents/views/client/build_event.php">
+                        <?php echo csrfField(); ?>
+                        <button class="btn btn-primary" type="submit" name="add_service" value="<?php echo (int) $service['id']; ?>">Agregar a mi cotizacion</button>
+                    </form>
                     <a class="btn btn-outline js-page-link" href="/GoldenHoursEvents/views/client/services.php">Volver a servicios</a>
                 </div>
             </div>

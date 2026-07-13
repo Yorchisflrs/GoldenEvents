@@ -10,6 +10,8 @@ $message = '';
 $messageType = 'error';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     $result = EventController::createEvent($user['id'], $_POST);
     $message = $result['message'];
     $messageType = $result['success'] ? 'success' : 'error';
@@ -32,6 +34,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
         <?php endif; ?>
 
         <form class="form-container" method="POST" action="/GoldenHoursEvents/views/organizer/create_event.php">
+            <?php echo csrfField(); ?>
             <div class="grid-2">
                 <div class="form-group">
                     <label for="titulo">Titulo</label>

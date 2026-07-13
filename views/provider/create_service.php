@@ -11,6 +11,8 @@ $messageType = 'error';
 $categories = Category::allActive();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     $result = ServiceController::createService(currentUser()['id'], $_POST, $_FILES);
     $message = $result['message'];
     $messageType = $result['success'] ? 'success' : 'error';
@@ -33,6 +35,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
         <?php endif; ?>
 
         <form class="form-container" method="POST" action="/GoldenHoursEvents/views/provider/create_service.php" enctype="multipart/form-data">
+            <?php echo csrfField(); ?>
             <div class="form-group">
                 <label for="categoria_id">Categoria de servicio</label>
                 <select id="categoria_id" name="categoria_id" required>

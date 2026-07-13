@@ -9,30 +9,36 @@ if (!isset($_SESSION['quote_services']) || !is_array($_SESSION['quote_services']
     $_SESSION['quote_services'] = [];
 }
 
-if (isset($_GET['add_service'])) {
-    $serviceId = (int) $_GET['add_service'];
-    $service = ServiceController::getService($serviceId);
-    if ($service && !in_array($serviceId, $_SESSION['quote_services'], true)) {
-        $_SESSION['quote_services'][] = $serviceId;
-    }
-    redirect('/GoldenHoursEvents/views/client/build_event.php');
-}
-
-if (isset($_GET['remove_service'])) {
-    $serviceId = (int) ($_GET['remove_service']);
-    $_SESSION['quote_services'] = array_values(array_filter(
-        $_SESSION['quote_services'],
-        fn($id) => (int) $id !== $serviceId
-    ));
-    redirect('/GoldenHoursEvents/views/client/build_event.php');
-}
-
 $message = '';
 $messageType = 'error';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
+    if (isset($_POST['add_service'])) {
+        $serviceId = (int) $_POST['add_service'];
+        $service = ServiceController::getService($serviceId);
+
+        if ($service && $service['estado'] === 'activo' && (int) $service['disponibilidad'] === 1
+            && !in_array($serviceId, $_SESSION['quote_services'], true)) {
+            $_SESSION['quote_services'][] = $serviceId;
+        }
+
+        redirect('/GoldenHoursEvents/views/client/build_event.php');
+    }
+
+    if (isset($_POST['remove_service'])) {
+        $serviceId = (int) $_POST['remove_service'];
+        $_SESSION['quote_services'] = array_values(array_filter(
+            $_SESSION['quote_services'],
+            fn($id) => (int) $id !== $serviceId
+        ));
+        redirect('/GoldenHoursEvents/views/client/build_event.php');
+    }
+
+    requireLogin();
     $_POST['selected_services'] = $_SESSION['quote_services'];
-    $userId = isLoggedIn() ? currentUser()['id'] : null;
+    $userId = currentUser()['id'];
     $result = QuoteController::createQuote($_POST, $userId);
 
     if ($result['success']) {
@@ -78,6 +84,7 @@ if (!$isFragment) {
 
         <div class="builder-grid">
             <form class="form-container glass-panel reveal" method="POST" action="/GoldenHoursEvents/views/client/build_event.php">
+                <?php echo csrfField(); ?>
                 <section class="builder-section">
                     <h2>1. Datos del cliente</h2>
                     <div class="form-group">
@@ -143,7 +150,7 @@ if (!$isFragment) {
                                         </label>
                                         <span>Subtotal: <strong>S/ <?php echo number_format((float) $service['precio'], 2); ?></strong></span>
                                     </div>
-                                    <a data-confirm="Quitar este servicio de la cotizacion?" data-no-transition href="/GoldenHoursEvents/views/client/build_event.php?remove_service=<?php echo (int) $service['id']; ?>">Quitar</a>
+                                    <button class="text-action-button" type="submit" name="remove_service" value="<?php echo (int) $service['id']; ?>" formnovalidate data-confirm="Quitar este servicio de la cotizacion?">Quitar</button>
                                 </article>
                             <?php endforeach; ?>
                         </div>
@@ -158,7 +165,7 @@ if (!$isFragment) {
 
                 <div class="actions">
                     <a class="btn btn-outline js-page-link" href="/GoldenHoursEvents/views/client/services.php">+ Agregar mas servicios</a>
-                    <button class="btn btn-primary" type="submit">Enviar solicitud de cotizacion</button>
+                    <button class="btn btn-primary" type="submit" name="action" value="create_quote">Enviar solicitud de cotizacion</button>
                 </div>
             </form>
 

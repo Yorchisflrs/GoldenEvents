@@ -15,6 +15,9 @@ class AuthController
             return false;
         }
 
+        session_regenerate_id(true);
+        rotateCsrfToken();
+
         $_SESSION['user'] = [
             'id' => $user['id'],
             'nombre' => $user['nombre'],

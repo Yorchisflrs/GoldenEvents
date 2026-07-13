@@ -18,6 +18,8 @@ if (!$event || (int) $event['organizador_id'] !== (int) $user['id']) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     $result = EventController::updateEvent($eventId, $user['id'], $_POST);
     $message = $result['message'];
     $messageType = $result['success'] ? 'success' : 'error';
@@ -44,6 +46,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
     <?php endif; ?>
 
     <form class="form" method="POST" action="/GoldenHoursEvents/views/organizer/edit_event.php?id=<?php echo $eventId; ?>">
+        <?php echo csrfField(); ?>
         <label for="titulo">Titulo</label>
         <input type="text" id="titulo" name="titulo" value="<?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?>" required>
 

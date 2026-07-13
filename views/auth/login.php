@@ -10,6 +10,8 @@ $error = '';
 $success = $_GET['success'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -44,6 +46,7 @@ if (!$isFragment) {
         <?php endif; ?>
 
         <form class="form-container" method="POST" action="/GoldenHoursEvents/views/auth/login.php">
+            <?php echo csrfField(); ?>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
@@ -58,16 +61,6 @@ if (!$isFragment) {
         </form>
 
         <p>No tienes cuenta? <a class="js-page-link" href="/GoldenHoursEvents/views/auth/register.php">Registrate aqui</a></p>
-
-        <div class="demo-box">
-            <h2>Usuarios demo</h2>
-            <ul class="link-list">
-                <li>admin@golden.com / password</li>
-                <li>organizador@golden.com / password</li>
-                <li>cliente@golden.com / password</li>
-                <li>proveedor@golden.com / password</li>
-            </ul>
-        </div>
     </section>
     </div>
 </section>

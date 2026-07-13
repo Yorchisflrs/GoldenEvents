@@ -65,11 +65,13 @@ class QuoteController
         ];
     }
 
-    public static function getQuote($id)
+    public static function getQuote($id, $userId, $isAdmin = false)
     {
+        $quote = Quote::findAccessibleById($id, $userId, $isAdmin);
+
         return [
-            'quote' => Quote::findById($id),
-            'details' => Quote::details($id),
+            'quote' => $quote,
+            'details' => $quote ? Quote::details($id) : [],
         ];
     }
 

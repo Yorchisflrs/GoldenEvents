@@ -7,6 +7,8 @@ $message = '';
 $messageType = 'error';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     $result = AuthController::register(
         trim($_POST['nombre'] ?? ''),
         trim($_POST['email'] ?? ''),
@@ -44,6 +46,7 @@ if (!$isFragment) {
         <?php endif; ?>
 
         <form class="form-container" method="POST" action="/GoldenHoursEvents/views/auth/register.php">
+            <?php echo csrfField(); ?>
             <div class="form-group">
                 <label for="nombre">Nombre</label>
                 <input type="text" id="nombre" name="nombre" required>

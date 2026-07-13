@@ -7,6 +7,8 @@ requireLogin();
 requireRole('admin');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
+
     QuoteController::changeStatus((int) ($_POST['quote_id'] ?? 0), trim($_POST['estado'] ?? ''));
 }
 
@@ -51,6 +53,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
                             <td><?php echo htmlspecialchars($quote['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
                             <td>
                                 <form method="POST" action="/GoldenHoursEvents/views/admin/quotes.php">
+                                    <?php echo csrfField(); ?>
                                     <input type="hidden" name="quote_id" value="<?php echo (int) $quote['id']; ?>">
                                     <select name="estado">
                                         <?php foreach (['pendiente', 'contactado', 'aprobado', 'rechazado', 'cancelado'] as $status): ?>

@@ -85,19 +85,27 @@ class Quote
                 $db->rollBack();
             }
 
+            error_log('[GoldenHourEvents] Error al crear cotizacion: ' . $e->getMessage());
             return ['success' => false, 'message' => 'No se pudo registrar la cotizacion.'];
         }
     }
 
-    public static function findById($id)
+    public static function findAccessibleById($id, $userId, $isAdmin = false)
     {
         $sql = "SELECT c.*, u.email AS usuario_email
                 FROM cotizaciones c
                 LEFT JOIN usuarios u ON c.usuario_id = u.id
-                WHERE c.id = :id
-                LIMIT 1";
+                WHERE c.id = :id";
+        $params = ['id' => $id];
+
+        if (!$isAdmin) {
+            $sql .= ' AND c.usuario_id = :usuario_id';
+            $params['usuario_id'] = $userId;
+        }
+
+        $sql .= ' LIMIT 1';
         $stmt = self::db()->prepare($sql);
-        $stmt->execute(['id' => $id]);
+        $stmt->execute($params);
         return $stmt->fetch();
     }
 

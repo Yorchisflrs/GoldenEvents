@@ -1,8 +1,6 @@
 <?php
 // Menu principal reutilizable.
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/csrf.php';
 
 $panelUrl = '/GoldenHoursEvents/views/client/dashboard.php';
 if (isset($_SESSION['user']['rol'])) {
@@ -35,7 +33,12 @@ function navCurrent($path, $currentPath)
             <li><a class="nav-link js-page-link" href="/GoldenHoursEvents/views/client/build_event.php"<?php echo navCurrent('/GoldenHoursEvents/views/client/build_event.php', $currentPath); ?>>🧩 Armar Evento</a></li>
             <?php if (isset($_SESSION['user'])): ?>
                 <li><a class="nav-link nav-user" href="<?php echo htmlspecialchars($panelUrl, ENT_QUOTES, 'UTF-8'); ?>">📊 Panel</a></li>
-                <li><a class="nav-link" href="/GoldenHoursEvents/views/auth/logout.php" data-no-transition>🚪 Cerrar sesion</a></li>
+                <li>
+                    <form class="nav-logout-form" method="POST" action="/GoldenHoursEvents/views/auth/logout.php" data-no-transition>
+                        <?php echo csrfField(); ?>
+                        <button class="nav-link nav-logout-button" type="submit">🚪 Cerrar sesion</button>
+                    </form>
+                </li>
             <?php else: ?>
                 <li><a class="nav-link js-page-link" href="/GoldenHoursEvents/views/auth/login.php"<?php echo navCurrent('/GoldenHoursEvents/views/auth/login.php', $currentPath); ?>>🔐 Login</a></li>
                 <li><a class="nav-link js-page-link" href="/GoldenHoursEvents/views/auth/register.php"<?php echo navCurrent('/GoldenHoursEvents/views/auth/register.php', $currentPath); ?>>📝 Registro</a></li>

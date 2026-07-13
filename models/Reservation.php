@@ -77,6 +77,7 @@ class Reservation
                 $db->rollBack();
             }
 
+            error_log('[GoldenHourEvents] Error al crear reserva: ' . $e->getMessage());
             return ['success' => false, 'message' => 'No se pudo completar la reserva.'];
         }
     }

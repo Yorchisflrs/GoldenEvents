@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/includes/auth.php';
+requireLogin();
+requireRole('admin');
 require_once __DIR__ . '/config/database.php';
 
 echo "<h1>Prueba de conexión - Golden Hour Events</h1>";
@@ -42,5 +45,6 @@ try {
     echo "</table>";
 
 } catch (Exception $e) {
-    echo "<p style='color:red;'>Error: " . htmlspecialchars($e->getMessage()) . "</p>";
+    error_log('[GoldenHourEvents] Error en diagnostico de base de datos: ' . $e->getMessage());
+    echo "<p style='color:red;'>No se pudo completar el diagnostico. Revisa el registro del servidor.</p>";
 }

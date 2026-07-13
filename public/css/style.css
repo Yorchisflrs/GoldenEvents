@@ -374,6 +374,36 @@ img {
     color: var(--gold-soft);
 }
 
+.nav-logout-form {
+    margin: 0;
+}
+
+.nav-logout-button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.text-action-button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    color: var(--primary-dark);
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-decoration: underline;
+}
+
 .nav-user {
     color: var(--gold-soft);
     font-weight: 700;

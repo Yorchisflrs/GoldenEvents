@@ -1,10 +1,14 @@
 <?php
-// Resultado publico de una cotizacion registrada.
+// Resultado privado de una cotizacion registrada.
+require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../controllers/QuoteController.php';
 
+requireLogin();
+
 $quoteId = (int) ($_GET['id'] ?? 0);
-$data = QuoteController::getQuote($quoteId);
+$user = currentUser();
+$data = QuoteController::getQuote($quoteId, (int) $user['id'], $user['rol'] === 'admin');
 $quote = $data['quote'];
 $details = $data['details'];
 

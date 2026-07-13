@@ -41,6 +41,19 @@ $applicationConfig = [
         'allowed_extensions' => environmentList('UPLOAD_ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png', 'webp']),
         'allowed_mimes' => environmentList('UPLOAD_ALLOWED_MIMES', ['image/jpeg', 'image/png', 'image/webp']),
     ],
+    'events' => [
+        'categories' => [
+            'Boda',
+            'Cumpleaños',
+            'Concierto',
+            'Conferencia',
+            'Corporativo',
+            'Fiesta escolar',
+            'Graduación',
+            'Matrimonio',
+            'Otro',
+        ],
+    ],
 ];
 
 function appConfig($key = null, $default = null)

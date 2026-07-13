@@ -35,6 +35,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
                             <th>Total estimado</th>
                             <th>Estado</th>
                             <th>Fecha registro</th>
+                            <th>Detalle</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,6 +48,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
                                 <td><strong>S/ <?php echo number_format((float) $quote['total_estimado'], 2); ?></strong></td>
                                 <td><span class="badge badge-<?php echo htmlspecialchars($quote['estado'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($quote['estado'], ENT_QUOTES, 'UTF-8'); ?></span></td>
                                 <td><?php echo htmlspecialchars($quote['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><a href="/GoldenHoursEvents/views/client/quote_result.php?id=<?php echo (int) $quote['id']; ?>">Abrir</a></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

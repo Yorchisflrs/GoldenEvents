@@ -25,6 +25,13 @@ class Category
         return $stmt->fetch();
     }
 
+    public static function findActiveById($id)
+    {
+        $stmt = self::db()->prepare("SELECT * FROM categorias_servicio WHERE id = :id AND estado = 'activo' LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch();
+    }
+
     public static function findBySlug($slug)
     {
         $stmt = self::db()->prepare('SELECT * FROM categorias_servicio WHERE slug = :slug LIMIT 1');

@@ -11,6 +11,22 @@ class Quote
         return $pdo;
     }
 
+    private static function moneyToCents($amount)
+    {
+        $amount = trim((string) $amount);
+        if (!preg_match('/^\d+(?:\.\d{1,2})?$/', $amount)) {
+            throw new InvalidArgumentException('Importe decimal inválido.');
+        }
+        [$whole, $decimals] = array_pad(explode('.', $amount, 2), 2, '');
+        return ((int) $whole * 100) + (int) str_pad($decimals, 2, '0');
+    }
+
+    private static function centsToMoney($cents)
+    {
+        $cents = (int) $cents;
+        return intdiv($cents, 100) . '.' . str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
+    }
+
     public static function createWithDetails($data, $selectedServices)
     {
         $db = self::db();
@@ -42,7 +58,7 @@ class Quote
             ]);
 
             $quoteId = (int) $db->lastInsertId();
-            $total = 0.0;
+            $totalCents = 0;
             $detailSql = "INSERT INTO cotizacion_detalles
                 (cotizacion_id, servicio_id, categoria_nombre, servicio_nombre, precio_unitario, cantidad, subtotal)
                 VALUES
@@ -50,8 +66,11 @@ class Quote
             $detailStmt = $db->prepare($detailSql);
             $serviceStmt = $db->prepare("SELECT s.id, s.nombre, s.precio, c.nombre AS categoria
                                          FROM servicios s
-                                         LEFT JOIN categorias_servicio c ON s.categoria_id = c.id
+                                         INNER JOIN proveedores p ON p.id = s.proveedor_id
+                                         INNER JOIN usuarios u ON u.id = p.usuario_id
+                                         INNER JOIN categorias_servicio c ON s.categoria_id = c.id
                                          WHERE s.id = :id AND s.estado = 'activo' AND s.disponibilidad = 1
+                                           AND p.estado = 'activo' AND u.estado = 'activo' AND c.estado = 'activo'
                                          LIMIT 1");
 
             foreach ($selectedServices as $serviceId => $quantity) {
@@ -63,26 +82,27 @@ class Quote
                 }
 
                 $quantity = max(1, (int) $quantity);
-                $price = (float) $service['precio'];
-                $subtotal = $price * $quantity;
-                $total += $subtotal;
+                $priceCents = self::moneyToCents($service['precio']);
+                $subtotalCents = $priceCents * $quantity;
+                $totalCents += $subtotalCents;
 
                 $detailStmt->execute([
                     'cotizacion_id' => $quoteId,
                     'servicio_id' => $service['id'],
                     'categoria_nombre' => $service['categoria'] ?? 'Sin categoria',
                     'servicio_nombre' => $service['nombre'],
-                    'precio_unitario' => $price,
+                    'precio_unitario' => self::centsToMoney($priceCents),
                     'cantidad' => $quantity,
-                    'subtotal' => $subtotal,
+                    'subtotal' => self::centsToMoney($subtotalCents),
                 ]);
             }
 
-            if ($total <= 0) {
+            if ($totalCents <= 0) {
                 $db->rollBack();
                 return ['success' => false, 'message' => 'Selecciona al menos un servicio valido.'];
             }
 
+            $total = self::centsToMoney($totalCents);
             $stmt = $db->prepare('UPDATE cotizaciones SET total_estimado = :total WHERE id = :id');
             $stmt->execute(['total' => $total, 'id' => $quoteId]);
 
@@ -131,7 +151,7 @@ class Quote
         $stmt = self::db()->prepare("SELECT c.*, u.email AS usuario_email
                                      FROM cotizaciones c
                                      LEFT JOIN usuarios u ON c.usuario_id = u.id
-                                     WHERE c.public_token_hash = :token_hash
+                                     WHERE c.public_token_hash = :token_hash AND c.usuario_id IS NULL
                                      LIMIT 1");
         $stmt->execute(['token_hash' => hash('sha256', strtolower($token))]);
         return $stmt->fetch();

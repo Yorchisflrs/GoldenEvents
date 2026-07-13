@@ -67,7 +67,7 @@ require_once __DIR__ . '/../../includes/navbar.php';
             <div class="grid-2">
                 <div class="form-group">
                     <label for="capacidad">Capacidad</label>
-                    <input type="number" id="capacidad" name="capacidad" min="0">
+                    <input type="number" id="capacidad" name="capacidad" min="1">
                 </div>
                 <div class="form-group">
                     <label for="ubicacion">Ubicacion</label>

@@ -11,8 +11,21 @@ class AuthController
     {
         $user = User::findByEmail($email);
 
-        if (!$user || $user['estado'] !== 'activo' || !password_verify($password, $user['password'])) {
-            return false;
+        if (!$user || !password_verify($password, $user['password'])) {
+            return ['success' => false, 'message' => 'El correo o la contraseña no son correctos.'];
+        }
+
+        $messages = [
+            'pendiente' => 'Tu cuenta está pendiente de aprobación administrativa.',
+            'rechazado' => 'Tu cuenta no fue aprobada. Contacta con administración si necesitas ayuda.',
+            'bloqueado' => 'Tu cuenta está bloqueada. Contacta con administración.',
+            'inactivo' => 'Tu cuenta se encuentra inactiva. Contacta con administración.',
+        ];
+        if ($user['estado'] !== 'activo') {
+            return [
+                'success' => false,
+                'message' => $messages[$user['estado']] ?? 'No se puede acceder con esta cuenta.',
+            ];
         }
 
         session_regenerate_id(true);
@@ -28,7 +41,7 @@ class AuthController
             'idioma' => $user['idioma'],
         ];
 
-        return true;
+        return ['success' => true, 'message' => 'Acceso correcto.'];
     }
 
     public static function register($nombre, $email, $password, $telefono, $rol)
@@ -57,9 +70,13 @@ class AuthController
 
         $created = User::create($nombre, $email, $password, $telefono, $rol);
 
+        $message = $rol === 'cliente'
+            ? 'Registro exitoso. Ahora puedes iniciar sesión.'
+            : 'Registro exitoso. Tu cuenta quedó pendiente de aprobación administrativa.';
+
         return [
             'success' => $created,
-            'message' => $created ? 'Registro exitoso. Ahora puedes iniciar sesion.' : 'No se pudo registrar el usuario.',
+            'message' => $created ? $message : 'No se pudo registrar el usuario.',
         ];
     }
 

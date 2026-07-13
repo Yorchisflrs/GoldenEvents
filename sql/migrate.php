@@ -1,5 +1,5 @@
 <?php
-// Ejecutor CLI de migraciones ordenadas y registradas para MariaDB.
+// Ejecutor CLI de migraciones ordenadas y registradas para MySQL de XAMPP.
 
 if (PHP_SAPI !== 'cli') {
     http_response_code(404);

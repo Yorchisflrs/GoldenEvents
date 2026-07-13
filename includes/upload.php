@@ -89,3 +89,34 @@ function uploadImage($file, $targetDir, $prefix = 'img')
 
     return ['success' => true, 'path' => $relativePath];
 }
+
+function deleteUploadedImage($relativePath, $allowedDirectory)
+{
+    $relativePath = trim(str_replace('\\', '/', (string) $relativePath), '/');
+    $allowedDirectory = trim(str_replace('\\', '/', (string) $allowedDirectory), '/');
+
+    if ($relativePath === '' || $allowedDirectory === '' || str_contains($relativePath, '..')) {
+        return false;
+    }
+
+    if (!str_starts_with($relativePath . '/', $allowedDirectory . '/')) {
+        return false;
+    }
+
+    $projectRoot = realpath(dirname(__DIR__));
+    $absolutePath = $projectRoot === false
+        ? false
+        : realpath($projectRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath));
+
+    if ($absolutePath === false || !is_file($absolutePath)) {
+        return false;
+    }
+
+    $allowedRoot = strtolower(str_replace('\\', '/', $projectRoot . DIRECTORY_SEPARATOR . $allowedDirectory));
+    $normalizedPath = strtolower(str_replace('\\', '/', $absolutePath));
+    if (!str_starts_with($normalizedPath, rtrim($allowedRoot, '/') . '/')) {
+        return false;
+    }
+
+    return unlink($absolutePath);
+}

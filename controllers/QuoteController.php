@@ -96,8 +96,4 @@ class QuoteController
         return Quote::all();
     }
 
-    public static function changeStatus($id, $estado)
-    {
-        return Quote::updateStatus($id, $estado);
-    }
 }

@@ -16,4 +16,4 @@ Reglas:
 - No modificar una migración ya registrada; crear la siguiente numeración.
 - No ejecutar `sql/database.sql` sobre una base con datos.
 - Separar sentencias múltiples con una línea `-- statement-break`.
-- El ejecutor es exclusivo de CLI, usa un bloqueo MariaDB y rechaza checksums alterados.
+- El ejecutor es exclusivo de CLI, usa un bloqueo de MySQL y rechaza checksums alterados.

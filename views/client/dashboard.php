@@ -19,6 +19,10 @@ require_once __DIR__ . '/../../includes/navbar.php';
         </div>
 
         <div class="grid-3">
+            <a class="dashboard-card" href="/GoldenHoursEvents/views/client/events.php">
+                <h2>Eventos</h2>
+                <p>Explora el catálogo público.</p>
+            </a>
             <a class="dashboard-card" href="/GoldenHoursEvents/views/client/services.php">
                 <span class="icon">🎉</span>
                 <h2>Ver servicios</h2>

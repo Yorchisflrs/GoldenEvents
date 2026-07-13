@@ -920,7 +920,7 @@ const doc = new Document({
 
       spacer(),
       heading2("3.5.2 Interfaces Hardware"),
-      para("Durante el desarrollo local, el sistema requiere una computadora con Windows 10 o superior, procesador Intel Core i3 o equivalente, m\xEDnimo 4 GB de RAM y espacio libre en disco para XAMPP, base de datos, archivos del proyecto e im\xE1genes cargadas. Para producci\xF3n, se recomienda un servidor web con PHP, MySQL/MariaDB y capacidad suficiente para almacenamiento de im\xE1genes."),
+      para("Durante el desarrollo local, el sistema requiere una computadora con Windows 10 o superior, procesador Intel Core i3 o equivalente, m\xEDnimo 4 GB de RAM y espacio libre en disco para XAMPP, base de datos, archivos del proyecto e im\xE1genes cargadas. Para producci\xF3n, se recomienda un servidor web con PHP, MySQL y capacidad suficiente para almacenamiento de im\xE1genes."),
 
       spacer(),
       heading2("3.5.3 Interfaces Software"),
@@ -932,9 +932,9 @@ const doc = new Document({
           headerRow(["Componente", "Descripci\xF3n"], [2800, 6560]),
           ...[
             ["Sistema operativo","Windows 10/11 durante desarrollo local; Linux recomendado para despliegue en servidor."],
-            ["Servidor local","XAMPP con Apache y MySQL/MariaDB."],
+            ["Servidor local","XAMPP con Apache y MySQL."],
             ["Lenguaje backend","PHP puro con PDO para acceso a datos."],
-            ["Base de datos","MySQL/MariaDB con tablas relacionales y claves for\xE1neas."],
+            ["Base de datos","MySQL con tablas relacionales y claves for\xE1neas."],
             ["Frontend","HTML5, CSS3 y JavaScript vanilla."],
             ["Editor","Visual Studio Code con agente Codex para asistencia de desarrollo."],
             ["Navegadores","Google Chrome, Microsoft Edge y Mozilla Firefox en versiones modernas."],
@@ -968,7 +968,7 @@ const doc = new Document({
           headerRow(["Tecnolog\xEDa", "Uso en el proyecto", "Justificaci\xF3n"], [2200, 3280, 3880]),
           ...[
             ["PHP puro","Backend y l\xF3gica de aplicaci\xF3n.","Permite control directo del sistema sin depender de frameworks."],
-            ["MySQL/MariaDB","Gesti\xF3n de datos relacionales.","Adecuado para usuarios, servicios, cotizaciones y relaciones entre entidades."],
+            ["MySQL","Gesti\xF3n de datos relacionales.","Adecuado para usuarios, servicios, cotizaciones y relaciones entre entidades."],
             ["PDO","Conexi\xF3n segura a base de datos.","Permite consultas preparadas y reduce riesgo de SQL Injection."],
             ["HTML5","Estructura de p\xE1ginas.","Est\xE1ndar web para interfaces accesibles."],
             ["CSS3","Dise\xF1o visual responsive.","Permite paleta Golden Hour, degradados, animaciones y tarjetas modernas."],

@@ -15,11 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (AuthController::login($email, $password)) {
+    $result = AuthController::login($email, $password);
+    if ($result['success']) {
         AuthController::redirectByRole();
     }
 
-    $error = 'Credenciales incorrectas o usuario inactivo.';
+    $error = $result['message'];
 }
 
 $pageTitle = 'Iniciar sesion';

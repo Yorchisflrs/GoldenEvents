@@ -90,3 +90,26 @@ function isFragmentRequest()
 {
     return isset($_GET['fragment']) && $_GET['fragment'] == '1';
 }
+
+function serviceDisplayImagePath(array $service)
+{
+    if (!empty($service['imagen'])) {
+        return (string) $service['imagen'];
+    }
+
+    $fallbacks = [
+        'local' => 'public/img/services/catalog/decoracion-golden-premium.jpg',
+        'decoracion' => 'public/img/services/catalog/decoracion-elegancia-andina.jpg',
+        'dj_musica' => 'public/img/services/catalog/dj-andino-mix.jpg',
+        'animador' => 'public/img/services/catalog/animacion-fiesta-total.jpg',
+        'torta' => 'public/img/services/catalog/torta-tematica-premium.jpg',
+        'catering' => 'public/img/services/catalog/buffet-celebracion.jpg',
+        'fotografia_video' => 'public/img/services/catalog/cobertura-fotografica.jpg',
+        'mesas_sillas' => 'public/img/services/catalog/decoracion-elegancia-andina.jpg',
+        'seguridad' => 'public/img/services/catalog/seguridad-eventos.jpg',
+        'otro' => 'public/img/services/catalog/animacion-fiesta-total.jpg',
+    ];
+
+    $slug = (string) ($service['categoria_slug'] ?? '');
+    return $fallbacks[$slug] ?? null;
+}

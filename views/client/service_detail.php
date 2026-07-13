@@ -11,25 +11,7 @@ $isFragment = isFragmentRequest();
 if (!$service || $service['estado'] !== 'activo' || (int) $service['disponibilidad'] !== 1) {
     redirect('/GoldenHoursEvents/views/errors/404.php');
 }
-
-if (!function_exists('serviceDetailIcon')) {
-    function serviceDetailIcon($slug)
-    {
-        $icons = [
-            'local' => '🏛️',
-            'decoracion' => '🎀',
-            'dj_musica' => '🎧',
-            'animador' => '🎤',
-            'torta' => '🎂',
-            'catering' => '🍽️',
-            'fotografia_video' => '📸',
-            'mesas_sillas' => '🪑',
-            'seguridad' => '🛡️',
-            'otro' => '✨',
-        ];
-        return $icons[$slug] ?? '✨';
-    }
-}
+$serviceImage = serviceDisplayImagePath($service);
 
 $pageTitle = $service['nombre'];
 if (!$isFragment) {
@@ -44,10 +26,12 @@ if (!$isFragment) {
         <div class="detail-layout">
             <div class="detail-media reveal">
                 <div class="detail-image">
-                    <?php if (!empty($service['imagen'])): ?>
-                        <img src="/GoldenHoursEvents/<?php echo htmlspecialchars($service['imagen'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" decoding="async" alt="Servicio <?php echo htmlspecialchars($service['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php if ($serviceImage !== null): ?>
+                        <img src="/GoldenHoursEvents/<?php echo htmlspecialchars($serviceImage, ENT_QUOTES, 'UTF-8'); ?>" loading="eager" decoding="async" width="1200" height="800" alt="Fotografía representativa del servicio <?php echo htmlspecialchars($service['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
                     <?php else: ?>
-                        <div class="image-placeholder category-<?php echo htmlspecialchars($service['categoria_slug'] ?? 'otro', ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"><?php echo serviceDetailIcon($service['categoria_slug'] ?? 'otro'); ?></div>
+                        <div class="image-placeholder category-<?php echo htmlspecialchars($service['categoria_slug'] ?? 'otro', ENT_QUOTES, 'UTF-8'); ?>" role="img" aria-label="Imagen no disponible para este servicio">
+                            <span>Imagen no disponible</span>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -63,15 +47,15 @@ if (!$isFragment) {
                 </div>
 
                 <ul class="meta-list">
-                    <li>👥 Capacidad: <?php echo htmlspecialchars($service['capacidad'] ?? 'No aplica', ENT_QUOTES, 'UTF-8'); ?></li>
-                    <li>📍 Ubicacion: <?php echo htmlspecialchars($service['ubicacion'] ?? 'Puno', ENT_QUOTES, 'UTF-8'); ?></li>
-                    <li>🤝 Proveedor: <?php echo htmlspecialchars($service['proveedor'], ENT_QUOTES, 'UTF-8'); ?></li>
+                    <li><strong>Capacidad:</strong> <?php echo htmlspecialchars($service['capacidad'] ?? 'No aplica', ENT_QUOTES, 'UTF-8'); ?><?php echo !empty($service['capacidad']) ? ' personas' : ''; ?></li>
+                    <li><strong>Ubicación:</strong> <?php echo htmlspecialchars($service['ubicacion'] ?? 'Puno', ENT_QUOTES, 'UTF-8'); ?></li>
+                    <li><strong>Proveedor:</strong> <?php echo htmlspecialchars($service['proveedor'], ENT_QUOTES, 'UTF-8'); ?></li>
                 </ul>
 
                 <div class="cta-row">
                     <form class="inline-form" method="POST" action="/GoldenHoursEvents/views/client/build_event.php">
                         <?php echo csrfField(); ?>
-                        <button class="btn btn-primary" type="submit" name="add_service" value="<?php echo (int) $service['id']; ?>">Agregar a mi cotizacion</button>
+                        <button class="btn btn-primary" type="submit" name="add_service" value="<?php echo (int) $service['id']; ?>">Agregar a mi cotización</button>
                     </form>
                     <a class="btn btn-outline js-page-link" href="/GoldenHoursEvents/views/client/services.php">Volver a servicios</a>
                 </div>
